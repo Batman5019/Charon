@@ -487,6 +487,57 @@ html, body {
 .avatar-preview-text { font-size: 11.5px; color: var(--text-muted); line-height: 1.5; }
 .avatar-preview-text strong { color: var(--text-main); font-weight: 500; }
 
+/* ── File upload ── */
+.img-input-group {
+  display: flex; flex-direction: column; gap: 6px;
+}
+.img-source-tabs {
+  display: flex; gap: 0; border: 1px solid var(--border); border-radius: var(--radius-xs); overflow: hidden; margin-bottom: 2px;
+}
+.img-tab {
+  flex: 1; padding: 7px 10px; background: transparent; border: none;
+  color: var(--text-muted); font-family: var(--font-display); font-size: 8.5px;
+  letter-spacing: 1.5px; text-transform: uppercase; cursor: pointer; transition: all 0.18s;
+  border-right: 1px solid var(--border);
+}
+.img-tab:last-child { border-right: none; }
+.img-tab.active { background: rgba(124,58,237,0.18); color: var(--text-bright); }
+.img-tab:hover:not(.active) { background: rgba(124,58,237,0.07); color: var(--text-main); }
+
+.img-panel { display: none; }
+.img-panel.active { display: block; }
+
+.drop-zone {
+  border: 1.5px dashed var(--border-md); border-radius: var(--radius-xs);
+  padding: 18px 12px; text-align: center; cursor: pointer;
+  transition: all 0.2s; background: var(--bg-raised); position: relative;
+}
+.drop-zone:hover, .drop-zone.drag-over {
+  border-color: var(--purple); background: rgba(124,58,237,0.08);
+  box-shadow: 0 0 16px rgba(124,58,237,0.1);
+}
+.drop-zone input[type="file"] {
+  position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+}
+.drop-zone-icon { font-size: 22px; margin-bottom: 6px; opacity: 0.5; }
+.drop-zone-label { font-family: var(--font-display); font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-muted); }
+.drop-zone-sub { font-size: 11px; color: var(--text-dim); margin-top: 3px; font-style: italic; }
+.drop-zone.has-file { border-color: var(--border-glow); }
+.drop-zone.has-file .drop-zone-icon { opacity: 1; }
+
+.upload-thumb-row {
+  display: none; align-items: center; gap: 10px; padding: 8px 10px;
+  background: var(--bg-raised); border: 1px solid var(--border-glow);
+  border-radius: var(--radius-xs); margin-top: 6px;
+}
+.upload-thumb-row.show { display: flex; }
+.upload-thumb { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid var(--purple); box-shadow: 0 0 12px var(--glow-purple); flex-shrink: 0; }
+.upload-thumb-info { flex: 1; min-width: 0; }
+.upload-thumb-name { font-size: 12px; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.upload-thumb-size { font-size: 10px; color: var(--text-dim); }
+.upload-clear-btn { background: transparent; border: none; color: var(--text-dim); cursor: pointer; font-size: 14px; padding: 2px 4px; border-radius: 3px; flex-shrink: 0; }
+.upload-clear-btn:hover { color: #f87171; }
+
 .profile-avatar-big { width: 84px; height: 84px; border-radius: 50%; object-fit: cover; border: 3px solid var(--purple); box-shadow: 0 0 32px var(--glow-purple); background: var(--bg-surface); display: block; margin: 0 auto 14px; }
 .profile-name { font-family: var(--font-display); font-size: 19px; font-weight: 700; letter-spacing: 2.5px; text-align: center; color: var(--text-bright); margin-bottom: 4px; }
 .profile-divider { width: 36px; height: 1px; background: linear-gradient(to right, transparent, var(--purple), transparent); margin: 12px auto; }
@@ -659,9 +710,33 @@ html, body {
       <input class="form-input" id="f-name" type="text" placeholder="e.g. Vesper, Alaric, Null..." autocomplete="off" maxlength="60" />
     </div>
     <div class="form-group">
-      <label class="form-label">Avatar Image URL</label>
-      <input class="form-input" id="f-image" type="url" placeholder="https://... (leave blank to auto-generate)" autocomplete="off" />
-      <div class="form-hint">Direct image link. Leave blank for a generated avatar.</div>
+      <label class="form-label">Avatar Image</label>
+      <div class="img-input-group">
+        <div class="img-source-tabs">
+          <button class="img-tab active" data-tab="url" data-ctx="char">URL</button>
+          <button class="img-tab" data-tab="upload" data-ctx="char">Upload</button>
+        </div>
+        <div class="img-panel active" id="char-url-panel">
+          <input class="form-input" id="f-image" type="url" placeholder="https://... (leave blank to auto-generate)" autocomplete="off" />
+          <div class="form-hint">Direct image link. Leave blank for a generated avatar.</div>
+        </div>
+        <div class="img-panel" id="char-upload-panel">
+          <div class="drop-zone" id="char-drop-zone">
+            <input type="file" id="char-file-input" accept="image/*" />
+            <div class="drop-zone-icon">🖼</div>
+            <div class="drop-zone-label">Drop image here or click to browse</div>
+            <div class="drop-zone-sub">PNG, JPG, GIF, WebP — max 3 MB</div>
+          </div>
+          <div class="upload-thumb-row" id="char-thumb-row">
+            <img class="upload-thumb" id="char-upload-thumb" src="" alt="" />
+            <div class="upload-thumb-info">
+              <div class="upload-thumb-name" id="char-upload-name"></div>
+              <div class="upload-thumb-size" id="char-upload-size"></div>
+            </div>
+            <button class="upload-clear-btn" id="char-upload-clear" title="Remove">✕</button>
+          </div>
+        </div>
+      </div>
     </div>
     <div class="form-group">
       <label class="form-label">Description *</label>
@@ -739,8 +814,32 @@ html, body {
       <div class="form-hint">This gives characters additional context about who they're speaking to.</div>
     </div>
     <div class="form-group">
-      <label class="form-label">Custom Avatar URL <span style="opacity:0.5;font-size:8px;letter-spacing:1px">(optional)</span></label>
-      <input class="form-input" id="up-avatar" type="url" placeholder="https://... (leave blank to auto-generate)" autocomplete="off" />
+      <label class="form-label">Custom Avatar <span style="opacity:0.5;font-size:8px;letter-spacing:1px">(optional)</span></label>
+      <div class="img-input-group">
+        <div class="img-source-tabs">
+          <button class="img-tab active" data-tab="url" data-ctx="up">URL</button>
+          <button class="img-tab" data-tab="upload" data-ctx="up">Upload</button>
+        </div>
+        <div class="img-panel active" id="up-url-panel">
+          <input class="form-input" id="up-avatar" type="url" placeholder="https://... (leave blank to auto-generate)" autocomplete="off" />
+        </div>
+        <div class="img-panel" id="up-upload-panel">
+          <div class="drop-zone" id="up-drop-zone">
+            <input type="file" id="up-file-input" accept="image/*" />
+            <div class="drop-zone-icon">🖼</div>
+            <div class="drop-zone-label">Drop image here or click to browse</div>
+            <div class="drop-zone-sub">PNG, JPG, GIF, WebP — max 3 MB</div>
+          </div>
+          <div class="upload-thumb-row" id="up-thumb-row">
+            <img class="upload-thumb" id="up-upload-thumb" src="" alt="" />
+            <div class="upload-thumb-info">
+              <div class="upload-thumb-name" id="up-upload-name"></div>
+              <div class="upload-thumb-size" id="up-upload-size"></div>
+            </div>
+            <button class="upload-clear-btn" id="up-upload-clear" title="Remove">✕</button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="btn-row">
@@ -1375,22 +1474,27 @@ function openCreateModal() {
 function closeCreateModal() { document.getElementById("create-modal").classList.add("hidden"); }
 function clearForm() {
   ["f-name","f-image","f-desc","f-personality","f-tags","f-greeting"].forEach(id => { document.getElementById(id).value = ""; });
+  clearUpload("char");
+  switchImgTab("char", "url");
   document.getElementById("avatar-preview-wrap").style.display = "none";
 }
 function updateAvatarPreview() {
   const name     = document.getElementById("f-name").value.trim();
   const imageUrl = document.getElementById("f-image").value.trim();
+  const uploadB64 = uploadState["char"];
   const wrap     = document.getElementById("avatar-preview-wrap");
   const img      = document.getElementById("avatar-preview-img");
   const label    = document.getElementById("avatar-preview-label");
-  if (!name && !imageUrl) { wrap.style.display = "none"; return; }
-  img.src = imageUrl || `https://api.dicebear.com/7.x/shapes/svg?seed=${encodeURIComponent(name)}&backgroundColor=0d0117&shapeColor=7c3aed`;
-  label.textContent = imageUrl ? "Custom image" : "Auto-generated";
+  if (!name && !imageUrl && !uploadB64) { wrap.style.display = "none"; return; }
+  const finalUrl = uploadB64 || imageUrl || `https://api.dicebear.com/7.x/shapes/svg?seed=${encodeURIComponent(name)}&backgroundColor=0d0117&shapeColor=7c3aed`;
+  img.src = finalUrl;
+  label.textContent = uploadB64 ? "Uploaded image" : imageUrl ? "Custom image" : "Auto-generated";
   wrap.style.display = "flex";
 }
 async function saveNewChar() {
   const name        = document.getElementById("f-name").value.trim();
-  const imageUrl    = document.getElementById("f-image").value.trim();
+  const imageUrlRaw = document.getElementById("f-image").value.trim();
+  const uploadB64   = uploadState["char"];
   const description = document.getElementById("f-desc").value.trim();
   const personality = document.getElementById("f-personality").value.trim();
   const tagsRaw     = document.getElementById("f-tags").value.trim();
@@ -1399,8 +1503,8 @@ async function saveNewChar() {
   if (!description) { showToast("Add a description."); return; }
   if (!personality) { showToast("Add a personality."); return; }
   const id = `user_${Date.now()}`;
-  const char = { id, name, description, personality,
-    imageUrl: imageUrl || `https://api.dicebear.com/7.x/shapes/svg?seed=${encodeURIComponent(name)}&backgroundColor=0d0117&shapeColor=7c3aed`,
+  const imageUrl = uploadB64 || imageUrlRaw || `https://api.dicebear.com/7.x/shapes/svg?seed=${encodeURIComponent(name)}&backgroundColor=0d0117&shapeColor=7c3aed`;
+  const char = { id, name, description, personality, imageUrl,
     tags: tagsRaw ? tagsRaw.split(",").map(t=>t.trim()).filter(Boolean) : [],
     greeting: greeting || "",
   };
@@ -1459,7 +1563,18 @@ function closeProfileModal() { document.getElementById("profile-modal").classLis
 function openUserProfileModal() {
   document.getElementById("up-name").value    = userProfile.name;
   document.getElementById("up-bio").value     = userProfile.bio;
-  document.getElementById("up-avatar").value  = userProfile.avatarUrl;
+
+  // If saved avatar is a data URL, restore upload tab state; otherwise use URL tab
+  if (userProfile.avatarUrl.startsWith("data:")) {
+    document.getElementById("up-avatar").value = "";
+    setUploadResult("up", userProfile.avatarUrl, "Saved image", "");
+    switchImgTab("up", "upload");
+  } else {
+    document.getElementById("up-avatar").value = userProfile.avatarUrl;
+    clearUpload("up");
+    switchImgTab("up", "url");
+  }
+
   syncUserProfilePreview();
   document.getElementById("user-profile-modal").classList.remove("hidden");
   document.getElementById("up-name").focus();
@@ -1468,14 +1583,14 @@ function closeUserProfileModal() { document.getElementById("user-profile-modal")
 
 function syncUserProfilePreview() {
   const name      = document.getElementById("up-name").value.trim();
-  const avatarUrl = document.getElementById("up-avatar").value.trim();
+  const urlVal    = document.getElementById("up-avatar").value.trim();
+  const uploadB64 = uploadState["up"];
   const displayName = name || "Anonymous";
 
-  // Preview avatar
   const generated = name
     ? `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name)}&backgroundColor=251e5e&textColor=c4b5fd`
     : "";
-  const finalAvatar = avatarUrl || generated;
+  const finalAvatar = uploadB64 || urlVal || generated;
 
   const bigAvatar = document.getElementById("up-big-avatar");
   if (finalAvatar) {
@@ -1497,7 +1612,9 @@ function syncUserProfilePreview() {
 function saveUserProfileModal() {
   const name      = document.getElementById("up-name").value.trim();
   const bio       = document.getElementById("up-bio").value.trim();
-  const avatarUrl = document.getElementById("up-avatar").value.trim();
+  const urlVal    = document.getElementById("up-avatar").value.trim();
+  const uploadB64 = uploadState["up"];
+  const avatarUrl = uploadB64 || urlVal;
 
   userProfile = { name, bio, avatarUrl };
   saveUserProfile();
@@ -1531,6 +1648,91 @@ function showToast(msg, dur = 2800) {
 }
 
 /* ══════════════════════════════════════════════════════
+   FILE UPLOAD — shared helpers for char & user profile
+══════════════════════════════════════════════════════ */
+// uploadState stores base64 data URLs per context key ("char" | "up")
+const uploadState = { char: null, up: null };
+
+function switchImgTab(ctx, tab) {
+  const tabs    = document.querySelectorAll(`.img-tab[data-ctx="${ctx}"]`);
+  const urlEl   = document.getElementById(`${ctx}-url-panel`);
+  const upEl    = document.getElementById(`${ctx}-upload-panel`);
+  tabs.forEach(t => t.classList.toggle("active", t.dataset.tab === tab));
+  urlEl.classList.toggle("active", tab === "url");
+  upEl.classList.toggle("active", tab === "upload");
+}
+
+function setUploadResult(ctx, dataUrl, fileName, fileSize) {
+  uploadState[ctx] = dataUrl;
+  const thumbRow  = document.getElementById(`${ctx}-thumb-row`);
+  const thumb     = document.getElementById(`${ctx}-upload-thumb`);
+  const nameEl    = document.getElementById(`${ctx}-upload-name`);
+  const sizeEl    = document.getElementById(`${ctx}-upload-size`);
+  const dropZone  = document.getElementById(`${ctx}-drop-zone`);
+  thumb.src       = dataUrl;
+  nameEl.textContent = fileName;
+  sizeEl.textContent = fileSize;
+  thumbRow.classList.add("show");
+  dropZone.classList.add("has-file");
+  // Trigger preview updates
+  if (ctx === "char") updateAvatarPreview();
+  if (ctx === "up")   syncUserProfilePreview();
+}
+
+function clearUpload(ctx) {
+  uploadState[ctx] = null;
+  const thumbRow = document.getElementById(`${ctx}-thumb-row`);
+  const dropZone = document.getElementById(`${ctx}-drop-zone`);
+  const fileInput = document.getElementById(`${ctx}-file-input`);
+  if (thumbRow) thumbRow.classList.remove("show");
+  if (dropZone)  dropZone.classList.remove("has-file");
+  if (fileInput) fileInput.value = "";
+  if (ctx === "char") updateAvatarPreview();
+  if (ctx === "up")   syncUserProfilePreview();
+}
+
+function formatBytes(bytes) {
+  if (bytes < 1024) return bytes + " B";
+  if (bytes < 1048576) return (bytes / 1024).toFixed(1) + " KB";
+  return (bytes / 1048576).toFixed(1) + " MB";
+}
+
+function handleImageFile(ctx, file) {
+  if (!file || !file.type.startsWith("image/")) { showToast("Please choose an image file."); return; }
+  if (file.size > 3 * 1024 * 1024) { showToast("Image must be under 3 MB."); return; }
+  const reader = new FileReader();
+  reader.onload = e => setUploadResult(ctx, e.target.result, file.name, formatBytes(file.size));
+  reader.readAsDataURL(file);
+}
+
+function initDropZone(ctx) {
+  const dropZone  = document.getElementById(`${ctx}-drop-zone`);
+  const fileInput = document.getElementById(`${ctx}-file-input`);
+  const clearBtn  = document.getElementById(`${ctx}-upload-clear`);
+
+  fileInput.addEventListener("change", e => {
+    if (e.target.files[0]) handleImageFile(ctx, e.target.files[0]);
+  });
+
+  dropZone.addEventListener("dragover", e => { e.preventDefault(); dropZone.classList.add("drag-over"); });
+  dropZone.addEventListener("dragleave", () => dropZone.classList.remove("drag-over"));
+  dropZone.addEventListener("drop", e => {
+    e.preventDefault();
+    dropZone.classList.remove("drag-over");
+    const file = e.dataTransfer.files[0];
+    if (file) handleImageFile(ctx, file);
+  });
+
+  clearBtn.addEventListener("click", e => { e.stopPropagation(); clearUpload(ctx); });
+}
+
+function initImgTabs(ctx) {
+  document.querySelectorAll(`.img-tab[data-ctx="${ctx}"]`).forEach(btn => {
+    btn.addEventListener("click", () => switchImgTab(ctx, btn.dataset.tab));
+  });
+}
+
+/* ══════════════════════════════════════════════════════
    UTILS
 ══════════════════════════════════════════════════════ */
 function escapeHtml(s = "") {
@@ -1551,6 +1753,12 @@ function updateCharCounter() {
 document.addEventListener("DOMContentLoaded", () => {
   loadUserProfile();
   updateProfileUI();
+
+  // File upload drop zones & tabs
+  initDropZone("char");
+  initImgTabs("char");
+  initDropZone("up");
+  initImgTabs("up");
 
   const msgInput = document.getElementById("msg-input");
 
